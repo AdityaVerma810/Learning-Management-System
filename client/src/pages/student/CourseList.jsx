@@ -8,6 +8,15 @@ const CourseList = () => {
 
 	const {navigate,allCourses}=useContext(AppContext)
 	const {input}=useParams()
+	const [filteredCourse,setFilteredCourse]=useState([])
+
+	useEffect(()=>{
+		if(allCourses && allCourses.length >0){
+			const tempCourses=allCourses.slice()
+
+			
+		}
+	},[allCourses,input])
 
 
   return (
