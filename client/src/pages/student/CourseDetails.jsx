@@ -13,6 +13,8 @@ const CourseDetails = () => {
     const findCourse = allCourses.find(course => course._id === id);
     setCourseData(findCourse);
   };
+  // function to calculate course chaptr time
+  
 
   useEffect(() => {
     fetchCourseData();
@@ -40,7 +42,7 @@ const CourseDetails = () => {
           ></p>
 
           {/* Review and Rating */}
-          <div className='flex items-center space-x-2 mt-4'>
+          <div className='flex items-center space-x-2 pt-3 pb-1 text-sm'>
             <p className='font-semibold text-gray-700'>{rating.toFixed(1)}</p>
             <div className='flex'>
               {[...Array(5)].map((_, i) => (
@@ -52,8 +54,12 @@ const CourseDetails = () => {
                 />
               ))}
             </div>
-            <p className='text-gray-500 '>{courseData.courseRatings.length} {courseData.courseRatings.length >1 ? 'ratings ': 'rating'}</p>
+            <p className='text-blue-600 '>{courseData.courseRatings.length} {courseData.courseRatings.length >1 ? 'ratings ': 'rating'}</p>
+
+            <p>{courseData.enrolledStudents.length} {courseData.enrolledStudents.length > 1 ?'students' : 'student'}</p>
+            
           </div>
+          <p className='text-sm'>Course by <span className='text-blue-600 underline'>Aditya Verma</span></p>
         </div>
       </div>
     </>
