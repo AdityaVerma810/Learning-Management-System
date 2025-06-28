@@ -43,7 +43,7 @@ export const AppContextProvider=(props)=>{
 	}
 	// function to calculate course chapter time
 
-const calculateChapterTie=(chapter)=>{
+const calculateChapterTime=(chapter)=>{
 	let time=0
 	chapter.chapterContent.map((lecture)=> time+= lecture.lectureDuration)
 	return humanizeDuration(time* 60 *1000,{units: ["h","m"]})
@@ -60,13 +60,25 @@ const calculateCourseDuration=(course)=>{
 	return humanizeDuration(time* 60 *1000,{units: ["h","m"]})
 }
 
+
+// function to calcuate number of lecture in the course
+const  calaculateNumberofLecture=(course)=>{
+	let totalLecture=0;
+	course.courseContent.forEach(chapter=>{
+		if(Array.isArray(chapter.chapterContent)){
+			totalLecture+=chapter.chapterContent.length;
+		}
+	});
+	return totalLecture;
+}
+
 useEffect(()=>{
 	fetchAllCourses();
 },[]);
 	
 
 	const value={
-		currency,allCourses,navigate,calculateRating,isEducator,setIsEducator
+		currency,allCourses,navigate,calculateRating,isEducator,setIsEducator,calaculateNumberofLecture,calculateCourseDuration,calculateChapterTime
 	}
 
 	return (
