@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { assets } from '../../assets/assets';
 import Loading from '../../components/students/Loading';
+import humanizeDuration from 'humanize-duration';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -12,7 +13,6 @@ const CourseDetails = () => {
     calculateRating,
     calculateCourseDuration,
     calculateChapterTime,
-    // calculateNumberOfLectures (Optional - use only if defined)
   } = useContext(AppContext);
 
   const fetchCourseData = () => {
@@ -59,6 +59,7 @@ const CourseDetails = () => {
               />
             ))}
           </div>
+
           <p className='text-blue-600'>
             {ratingCount} {ratingCount > 1 ? 'ratings' : 'rating'}
           </p>
@@ -86,12 +87,31 @@ const CourseDetails = () => {
                   <img src={assets.down_arrow_icon} alt='arrow icon' className='w-4 h-4' />
                   <p className='font-medium'>{chapter.chapterTitle}</p>
                 </div>
-                
+
                 <p className='text-xs text-gray-500 ml-6'>
-                  {chapter.chapterContent.length} lecture- {calculateChapterTime(chapter)}
+                  {chapter.chapterContent.length} lecture{chapter.chapterContent.length > 1 ? 's' : ''} - {calculateChapterTime(chapter)}
                 </p>
+                
+                <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
+                  {chapter.chapterContent.map((lecture, i) => (
+                    <li key={i} className='flex items-start gap-2 py-1'>
+                      <img src={assets.play_icon} alt='play icon' className='w-4 h-4 mt-1' />
+                      <div className='flex item-center justify-between w-full text-gray-800 text-xs md:text-default'>
+                        <p className='font-medium text-sm'>{lecture.lectureTitle}</p>
+                        <div className='text-xs text-gray-500 flex gap-3'>
+                          {lecture.isPreviewFree && <span className='text-green-600 font-semibold'>Preview</span>}
+                          <span>
+                            {humanizeDuration(lecture.lectureDuration * 60 * 1000, {
+                              units: ['h', 'm'],
+                              round: true,
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              
             ))}
           </div>
         </div>
