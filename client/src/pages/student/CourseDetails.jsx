@@ -8,6 +8,7 @@ import humanizeDuration from 'humanize-duration';
 const CourseDetails = () => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
+  const [openSections,setOpenSections]=useState({})
   const {
     allCourses,
     calculateRating,
@@ -23,6 +24,15 @@ const CourseDetails = () => {
   useEffect(() => {
     fetchCourseData();
   }, [id, allCourses]);
+
+  const toggleSection=(index)=>{
+    setOpenSections((prev)=>(
+      {...prev,
+        [index]: !prev[index],
+      }
+    ))
+
+  }
 
   if (!courseData) return <Loading />;
 
@@ -82,7 +92,7 @@ const CourseDetails = () => {
 
           <div className='pt-5'>
             {courseData.courseContent?.map((chapter, index) => (
-              <div key={index} className='mb-4 border-b pb-2'>
+              <div key={index} className='mb-4 border-b pb-2' onClick={()=> toggleSection(index)}>
                 <div className='flex items-center gap-2'>
                   <img src={assets.down_arrow_icon} alt='arrow icon' className='w-4 h-4' />
                   <p className='font-medium'>{chapter.chapterTitle}</p>
@@ -91,7 +101,7 @@ const CourseDetails = () => {
                 <p className='text-xs text-gray-500 ml-6'>
                   {chapter.chapterContent.length} lecture{chapter.chapterContent.length > 1 ? 's' : ''} - {calculateChapterTime(chapter)}
                 </p>
-                
+                <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
                 <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
                   {chapter.chapterContent.map((lecture, i) => (
                     <li key={i} className='flex items-start gap-2 py-1'>
@@ -111,6 +121,7 @@ const CourseDetails = () => {
                     </li>
                   ))}
                 </ul>
+                </div>
               </div>
             ))}
           </div>
