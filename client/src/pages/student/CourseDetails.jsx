@@ -94,12 +94,12 @@ const CourseDetails = () => {
             {courseData.courseContent?.map((chapter, index) => (
               <div key={index} className='mb-4 border-b pb-2' onClick={()=> toggleSection(index)}>
                 <div className='flex items-center gap-2'>
-                  <img src={assets.down_arrow_icon} alt='arrow icon' className='w-4 h-4' />
+                  <img className={`transform transition-transform ${openSections[index] ? 'rotate-180' : ''}`} src={assets.down_arrow_icon} alt='arrow icon' className='w-4 h-4' />
                   <p className='font-medium'>{chapter.chapterTitle}</p>
                 </div>
 
                 <p className='text-xs text-gray-500 ml-6'>
-                  {chapter.chapterContent.length} lecture{chapter.chapterContent.length > 1 ? 's' : ''} - {calculateChapterTime(chapter)}
+                  {chapter.chapterContent.length} lecture{chapter   .chapterContent.length > 1 ? 's' : ''} - {calculateChapterTime(chapter)}
                 </p>
                 <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
                 <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
@@ -125,6 +125,15 @@ const CourseDetails = () => {
               </div>
             ))}
           </div>
+        </div>
+        <div className='py-20 text-sm md:text-default'>
+          <h3 className='text-xl font-semibold text-gray-800'>Course Dicription</h3>
+          <p
+          className='pt-3 rich-text'
+          dangerouslySetInnerHTML={{
+            __html: (courseData.courseDescription || ''),
+          }}
+        ></p>
         </div>
       </div>
     </div>
