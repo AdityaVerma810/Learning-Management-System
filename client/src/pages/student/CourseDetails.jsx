@@ -8,13 +8,25 @@ import humanizeDuration from 'humanize-duration';
 const CourseDetails = () => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
-  const [openSections,setOpenSections]=useState({})
+  const [openSections, setOpenSections] = useState({});
+  const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
+
   const {
     allCourses,
     calculateRating,
     calculateCourseDuration,
-    calculateChapterTime,currency
+    calculateChapterTime,
+    currency,
   } = useContext(AppContext);
+
+  // ✅ Helper: Calculate total lectures
+  const calculateNoOfLectures = (course) => {
+    if (!course || !course.courseContent) return 0;
+    return course.courseContent.reduce(
+      (total, chapter) => total + (chapter.chapterContent?.length || 0),
+      0
+    );
+  };
 
   const fetchCourseData = () => {
     const findCourse = allCourses.find((course) => course._id === id);
@@ -25,20 +37,23 @@ const CourseDetails = () => {
     fetchCourseData();
   }, [id, allCourses]);
 
-  const toggleSection=(index)=>{
-    setOpenSections((prev)=>(
-      {...prev,
-        [index]: !prev[index],
-      }
-    ))
-
-  }
+  const toggleSection = (index) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   if (!courseData) return <Loading />;
 
   const rating = calculateRating(courseData);
   const ratingCount = courseData.courseRatings?.length || 0;
   const duration = calculateCourseDuration(courseData);
+  const totalLectures = calculateNoOfLectures(courseData);
+  const discountedPrice = (
+    courseData.coursePrice -
+    (courseData.discount * courseData.coursePrice) / 100
+  ).toFixed(2);
 
   return (
     <div className='flex md:flex-row flex-col-reverse gap-10 relative items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left'>
@@ -64,12 +79,11 @@ const CourseDetails = () => {
               <img
                 key={i}
                 src={i < Math.floor(rating) ? assets.star : assets.star_blank}
-                alt=''
+                alt='star'
                 className='w-3.5 h-3.5'
               />
             ))}
           </div>
-
           <p className='text-blue-600'>
             {ratingCount} {ratingCount > 1 ? 'ratings' : 'rating'}
           </p>
@@ -86,82 +100,126 @@ const CourseDetails = () => {
         {/* Course Structure */}
         <div className='pt-8 text-gray-800'>
           <h2 className='text-xl font-semibold'>Course Structure</h2>
-          <p className='text-sm text-gray-500 pt-1'>
-            Total Duration: {duration}
-          </p>
+          <p className='text-sm text-gray-500 pt-1'>Total Duration: {duration}</p>
 
           <div className='pt-5'>
             {courseData.courseContent?.map((chapter, index) => (
-              <div key={index} className='mb-4 border-b pb-2' onClick={()=> toggleSection(index)}>
+              <div
+                key={index}
+                className='mb-4 border-b pb-2 cursor-pointer'
+                onClick={() => toggleSection(index)}
+              >
                 <div className='flex items-center gap-2'>
-                  <img className={`transform transition-transform ${openSections[index] ? 'rotate-180' : ''}`} src={assets.down_arrow_icon} alt='arrow icon' className='w-4 h-4' />
+                  <img
+                    className={`transform transition-transform w-4 h-4 ${
+                      openSections[index] ? 'rotate-180' : ''
+                    }`}
+                    src={assets.down_arrow_icon}
+                    alt='arrow icon'
+                  />
                   <p className='font-medium'>{chapter.chapterTitle}</p>
                 </div>
 
                 <p className='text-xs text-gray-500 ml-6'>
-                  {chapter.chapterContent.length} lecture{chapter   .chapterContent.length > 1 ? 's' : ''} - {calculateChapterTime(chapter)}
+                  {chapter.chapterContent.length} lecture
+                  {chapter.chapterContent.length > 1 ? 's' : ''} -{' '}
+                  {calculateChapterTime(chapter)}
                 </p>
-                <div className={`overflow-hidden transition-all duration-300 ${openSections[index] ? 'max-h-96' : 'max-h-0'}`}>
-                <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
-                  {chapter.chapterContent.map((lecture, i) => (
-                    <li key={i} className='flex items-start gap-2 py-1'>
-                      <img src={assets.play_icon} alt='play icon' className='w-4 h-4 mt-1' />
-                      <div className='flex item-center justify-between w-full text-gray-800 text-xs md:text-default'>
-                        <p className='font-medium text-sm'>{lecture.lectureTitle}</p>
-                        <div className='text-xs text-gray-500 flex gap-3'>
-                          {lecture.isPreviewFree && <span className='text-green-600 font-semibold'>Preview</span>}
-                          <span>
-                            {humanizeDuration(lecture.lectureDuration * 60 * 1000, {
-                              units: ['h', 'm'],
-                              round: true,
-                            })}
-                          </span>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openSections[index] ? 'max-h-96' : 'max-h-0'
+                  }`}
+                >
+                  <ul className='list-disc md:pl-10 pl-4 pr-4 py-2 text-gray-600 border-t border-gray-300'>
+                    {chapter.chapterContent.map((lecture, i) => (
+                      <li key={i} className='flex items-start gap-2 py-1'>
+                        <img
+                          src={assets.play_icon}
+                          alt='play icon'
+                          className='w-4 h-4 mt-1'
+                        />
+                        <div className='flex item-center justify-between w-full text-gray-800 text-xs md:text-default'>
+                          <p className='font-medium text-sm'>
+                            {lecture.lectureTitle}
+                          </p>
+                          <div className='text-xs text-gray-500 flex gap-3'>
+                            {lecture.isPreviewFree && (
+                              <span className='text-green-600 font-semibold'>
+                                Preview
+                              </span>
+                            )}
+                            <span>
+                              {humanizeDuration(
+                                lecture.lectureDuration * 60 * 1000,
+                                {
+                                  units: ['h', 'm'],
+                                  round: true,
+                                }
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
         <div className='py-20 text-sm md:text-default'>
-          <h3 className='text-xl font-semibold text-gray-800'>Course Dicription</h3>
+          <h3 className='text-xl font-semibold text-gray-800'>
+            Course Description
+          </h3>
           <p
-          className='pt-3 rich-text'
-          dangerouslySetInnerHTML={{
-            __html: (courseData.courseDescription || ''),
-          }}
-        ></p>
+            className='pt-3 rich-text'
+            dangerouslySetInnerHTML={{
+              __html: courseData.courseDescription || '',
+            }}
+          ></p>
         </div>
       </div>
+
+      {/* Side Price Card */}
       <div className='max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]'>
-        <img src={courseData.courseThumbnail} alt=''/>
-        <div className='pt-5'>
-          <img src={assets.time_left_clock_icon} alt='time left clock icon'/>
-          <p className='text-red-500'><span className='font-medium'>7 days left at this price !</span></p>
+        <img src={courseData.courseThumbnail} alt='Course thumbnail' />
+        <div className='p-4'>
+          <div className='flex items-center gap-2'>
+            <img src={assets.time_left_clock_icon} alt='time icon' />
+            <p className='text-red-500 font-medium'>
+              7 days left at this price!
+            </p>
+          </div>
 
-        </div>
-        <div className='flex gap-3 items-center pt-2'>
-          <p className='text-gray-800 md:text-4xl text-2xl font-semibold'>{currency} {(courseData.coursePrice - courseData.discount * courseData.coursePrice /100).toFixed(2)}</p>
-          <p className='md: text-lg text-gray-500 line-through'>{currency} {courseData.coursePrice}</p>
-          <p className='md: text-lg text-gray-500'>{courseData.discount}%off</p>
-        </div>
-        <div className='flex items-center text-sm md:text-default gap-4 pt-2 md:pt-4 text-gray-500'>
-          <div className='flex items-center gap-1'>
-            <img src={assets.star} alt="star icon"/>
-            <p>{calculateRating(courseData)}</p>
-          </div>  
-          <div className='h-4 w-px bg-gray-500/40'>
+          <div className='flex gap-3 items-center pt-2'>
+            <p className='text-gray-800 md:text-4xl text-2xl font-semibold'>
+              {currency} {discountedPrice}
+            </p>
+            <p className='text-lg text-gray-500 line-through'>
+              {currency} {courseData.coursePrice}
+            </p>
+            <p className='text-lg text-gray-500'>{courseData.discount}% off</p>
+          </div>
+
+          <div className='flex items-center text-sm md:text-default gap-4 pt-4 text-gray-500'>
             <div className='flex items-center gap-1'>
-            <img src={assets.time_clock_icon} alt="clock icon"/>
-            <p>{calculateCourseDuration(courseData)}</p>
+              <img src={assets.star} alt='star icon' />
+              <p>{rating.toFixed(1)}</p>
+            </div>
+            <div className='h-4 w-px bg-gray-500/40'></div>
+            <div className='flex items-center gap-1'>
+              <img src={assets.time_clock_icon} alt='clock icon' />
+              <p>{duration}</p>
+            </div>
+            <div className='h-4 w-px bg-gray-500/40'></div>
+            <div className='flex items-center gap-1'>
+              <img src={assets.lesson_icon} alt='lesson icon' />
+              <p>{calculateNoOfLectures(courseData)} lessons</p>
+            </div>
           </div>
-          <div className='h-4 w-px bg-gray-500/40'></div>
-          
-
-          </div>
+        <button className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium' >{isAlreadyEnrolled ?'Already Enrolled' : 'Enroll Now'}</button>
         </div>
       </div>
     </div>
