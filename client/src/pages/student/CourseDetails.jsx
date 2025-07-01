@@ -4,6 +4,7 @@ import { AppContext } from '../../context/AppContext';
 import { assets } from '../../assets/assets';
 import Loading from '../../components/students/Loading';
 import humanizeDuration from 'humanize-duration';
+import Footer from '../../components/students/Footer';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -56,6 +57,7 @@ const CourseDetails = () => {
   ).toFixed(2);
 
   return (
+    <>
     <div className='flex md:flex-row flex-col-reverse gap-10 relative items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left'>
       <div className='absolute top-0 left-0 w-full h-section-height -z-1 bg-gradient-to-b from-cyan-100/70'></div>
 
@@ -220,9 +222,23 @@ const CourseDetails = () => {
             </div>
           </div>
         <button className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium' >{isAlreadyEnrolled ?'Already Enrolled' : 'Enroll Now'}</button>
+        <div>
+          <p className='md: text-xl text-lg font-medium text-gray-800'>What's in the course ?</p>
+          <ul>
+            <li>lifetime access with free updates</li>
+            <li>Step-by-step, hands-on project guidance</li>
+            <li>Downloadable resources and source code</li>
+            <li>Quizzes to test your Knowledge</li>
+            <li>Certificate of completion</li>
+          </ul>
         </div>
+        </div>
+        
       </div>
+            
     </div>
+    <Footer/>
+    </>
   );
 };
 
