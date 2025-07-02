@@ -5,12 +5,13 @@ import { assets } from '../../assets/assets';
 import Loading from '../../components/students/Loading';
 import humanizeDuration from 'humanize-duration';
 import Footer from '../../components/students/Footer';
-
+import YouTube from 'react-youtube'
 const CourseDetails = () => {
   const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [openSections, setOpenSections] = useState({});
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
+  const [playerData, setPlayerData]=useState(null)
 
   const {
     allCourses,
@@ -147,7 +148,7 @@ const CourseDetails = () => {
                           </p>
                           <div className='text-xs text-gray-500 flex gap-3'>
                             {lecture.isPreviewFree && (
-                              <span className='text-green-600 font-semibold'>
+                              <span onClick={()=>setPlayerData({videoId : lecture.lectureUrl.split('/').pop()})} className='text-green-600 font-semibold'>
                                 Preview
                               </span>
                             )}
@@ -189,7 +190,13 @@ const CourseDetails = () => {
         <img src={courseData.courseThumbnail} alt='Course thumbnail' />
         <div className='p-4'>
           <div className='flex items-center gap-2'>
-            <img src={assets.time_left_clock_icon} alt='time icon' />
+            {
+
+              playerData ?
+              <YouTube videoId={playerData.videoId} opts={{playerVars :{autoplay: 1} }} iframeClassName='w-full aspect-video' />
+              : <img src={assets.time_left_clock_icon} alt='time icon' />
+            }
+            
             <p className='text-red-500 font-medium'>
               7 days left at this price!
             </p>
@@ -212,6 +219,7 @@ const CourseDetails = () => {
             </div>
             <div className='h-4 w-px bg-gray-500/40'></div>
             <div className='flex items-center gap-1'>
+              
               <img src={assets.time_clock_icon} alt='clock icon' />
               <p>{duration}</p>
             </div>
