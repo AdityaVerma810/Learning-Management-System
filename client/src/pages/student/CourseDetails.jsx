@@ -187,15 +187,19 @@ const CourseDetails = () => {
 
       {/* Side Price Card */}
       <div className='max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]'>
-        <img src={courseData.courseThumbnail} alt='Course thumbnail' />
+        {
+           playerData ?
+              <YouTube videoId={playerData.videoId} opts={{playerVars :{autoplay: 1} }} iframeClassName='w-full aspect-video' />
+              : <img src={courseData.courseThumbnail} alt='Course thumbnail' />
+        }
+        
         <div className='p-4'>
           <div className='flex items-center gap-2'>
-            {
+            
 
-              playerData ?
-              <YouTube videoId={playerData.videoId} opts={{playerVars :{autoplay: 1} }} iframeClassName='w-full aspect-video' />
-              : <img src={assets.time_left_clock_icon} alt='time icon' />
-            }
+              
+              <img src={assets.time_left_clock_icon} alt='time icon' />
+            
             
             <p className='text-red-500 font-medium'>
               7 days left at this price!
